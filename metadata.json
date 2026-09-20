@@ -1,0 +1,6 @@
+{
+  "name": "Igor e Adriana - Álbum de Fotos",
+  "description": "Álbum de fotos moderno e exclusivo de Igor e Adriana com molduras ornamentais clássicas, carrossel interativo e efeitos elegantes em fundo escuro.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
