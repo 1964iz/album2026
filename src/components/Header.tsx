@@ -1,6 +1,6 @@
 import React from 'react';
 import { ViewMode } from '../types';
-import { Sparkles, Music, VolumeX, Volume2, Upload, BookOpen, LayoutGrid, Image as ImageIcon, Replace, Database } from 'lucide-react';
+import { Sparkles, Music, VolumeX, Volume2, Upload, BookOpen, LayoutGrid, Image as ImageIcon, Replace, Database, Download, CheckCircle2 } from 'lucide-react';
 
 interface HeaderProps {
   viewMode: ViewMode;
@@ -9,6 +9,8 @@ interface HeaderProps {
   onToggleMusic: () => void;
   onOpenUploader: (mode?: 'replace' | 'append') => void;
   photosCount: number;
+  onExportBackup?: () => void;
+  isSavingCloud?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -18,6 +20,8 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleMusic,
   onOpenUploader,
   photosCount,
+  onExportBackup,
+  isSavingCloud = false,
 }) => {
   return (
     <header className="w-full relative z-30 pt-8 pb-6 px-4 sm:px-6 flex flex-col items-center text-center">
@@ -116,12 +120,38 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Cloud Database Synced Badge */}
           <div
             id="db-status-badge"
-            className="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-cinzel text-[#d4af37] bg-[#1a1712] border border-[#d4af37]/40 shadow-[0_0_8px_rgba(212,175,55,0.15)]"
+            className={`hidden lg:flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-cinzel border shadow-[0_0_8px_rgba(212,175,55,0.15)] transition-all ${
+              isSavingCloud
+                ? 'bg-[#2b2111] text-[#ffeaa7] border-[#ffd97d] animate-pulse'
+                : 'text-[#d4af37] bg-[#1a1712] border-[#d4af37]/40'
+            }`}
             title="Banco de dados Cloud Firestore ativo - Todas as fotos estão sincronizadas e seguras na nuvem"
           >
-            <Database className="w-3.5 h-3.5 text-[#ffd97d]" />
-            <span className="text-[11px] tracking-wide">{photosCount} Fotos no Banco</span>
+            {isSavingCloud ? (
+              <>
+                <Database className="w-3.5 h-3.5 text-[#ffd97d] animate-spin" />
+                <span className="text-[11px] tracking-wide">Salvando no Banco...</span>
+              </>
+            ) : (
+              <>
+                <Database className="w-3.5 h-3.5 text-[#ffd97d]" />
+                <span className="text-[11px] tracking-wide">{photosCount} Fotos no Banco</span>
+              </>
+            )}
           </div>
+
+          {/* Backup Export Button */}
+          {onExportBackup && (
+            <button
+              id="export-backup-btn"
+              onClick={onExportBackup}
+              className="hidden xl:flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-cinzel bg-[#141217] border border-[#382f20] text-[#c5a059] hover:bg-[#252019] hover:border-[#d4af37] transition-all"
+              title="Baixar backup completo de todas as fotos em formato JSON"
+            >
+              <Download className="w-3 h-3 text-[#d4af37]" />
+              <span>Backup</span>
+            </button>
+          )}
 
           {/* Ambient Music Button */}
           <button

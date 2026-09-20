@@ -7,6 +7,7 @@ import {
   saveSinglePhotoToStorage,
   deletePhotoFromStorage,
   subscribeToPhotos,
+  exportAlbumBackup,
 } from './utils/storage';
 import { romanticAudio } from './utils/audio';
 import { Header } from './components/Header';
@@ -28,6 +29,7 @@ export function App() {
   const [uploaderMode, setUploaderMode] = useState<'replace' | 'append'>('replace');
   const [isPlayingMusic, setIsPlayingMusic] = useState<boolean>(false);
   const [isWindowDragActive, setIsWindowDragActive] = useState<boolean>(false);
+  const [isSavingCloud, setIsSavingCloud] = useState<boolean>(false);
 
   // Load photos and subscribe to Cloud Firestore & local cache
   useEffect(() => {
@@ -115,14 +117,20 @@ export function App() {
   };
 
   // Replace all photos with new ones
-  const handleReplaceAllPhotos = (newPhotos: PhotoItem[]) => {
+  const handleReplaceAllPhotos = async (newPhotos: PhotoItem[]) => {
     setPhotos(newPhotos);
-    savePhotosToStorage(newPhotos);
+    setIsSavingCloud(true);
+    try {
+      await savePhotosToStorage(newPhotos);
+    } finally {
+      setIsSavingCloud(false);
+    }
     setCurrentIndex(0);
   };
 
   // Replace a single photo
-  const handleReplaceSinglePhoto = (id: string, newSrc: string, newTitle?: string) => {
+  const handleReplaceSinglePhoto = async (id: string, newSrc: string, newTitle?: string) => {
+    let updatedItem: PhotoItem | null = null;
     setPhotos((prev) => {
       const updated = prev.map((p) => {
         if (p.id === id) {
@@ -131,13 +139,22 @@ export function App() {
             src: newSrc,
             title: newTitle ? newTitle : p.title,
           };
-          saveSinglePhotoToStorage(item);
+          updatedItem = item;
           return item;
         }
         return p;
       });
       return updated;
     });
+
+    if (updatedItem) {
+      setIsSavingCloud(true);
+      try {
+        await saveSinglePhotoToStorage(updatedItem);
+      } finally {
+        setIsSavingCloud(false);
+      }
+    }
 
     if (lightboxPhoto && lightboxPhoto.id === id) {
       setLightboxPhoto((prev) =>
@@ -153,12 +170,17 @@ export function App() {
   };
 
   // Delete a single photo
-  const handleDeletePhoto = (id: string) => {
+  const handleDeletePhoto = async (id: string) => {
     setPhotos((prev) => {
       const updated = prev.filter((p) => p.id !== id);
-      deletePhotoFromStorage(id);
       return updated;
     });
+    setIsSavingCloud(true);
+    try {
+      await deletePhotoFromStorage(id);
+    } finally {
+      setIsSavingCloud(false);
+    }
     setCurrentIndex((prev) => Math.max(0, Math.min(prev, photos.length - 2)));
     if (lightboxPhoto && lightboxPhoto.id === id) {
       setLightboxPhoto(null);
@@ -166,19 +188,27 @@ export function App() {
   };
 
   // Add new photos via uploader
-  const handleAddPhotos = (newPhotos: PhotoItem[]) => {
-    setPhotos((prev) => {
-      const updated = [...newPhotos, ...prev];
-      savePhotosToStorage(updated);
-      return updated;
-    });
+  const handleAddPhotos = async (newPhotos: PhotoItem[]) => {
+    const updated = [...newPhotos, ...photos];
+    setPhotos(updated);
+    setIsSavingCloud(true);
+    try {
+      await savePhotosToStorage(updated);
+    } finally {
+      setIsSavingCloud(false);
+    }
     setCurrentIndex(0);
   };
 
   // Reset to initial photos
-  const handleResetPhotos = () => {
+  const handleResetPhotos = async () => {
     setPhotos(INITIAL_PHOTOS);
-    savePhotosToStorage(INITIAL_PHOTOS);
+    setIsSavingCloud(true);
+    try {
+      await savePhotosToStorage(INITIAL_PHOTOS);
+    } finally {
+      setIsSavingCloud(false);
+    }
     setCurrentIndex(0);
   };
 
@@ -222,6 +252,8 @@ export function App() {
           onToggleMusic={handleToggleMusic}
           onOpenUploader={handleOpenUploader}
           photosCount={photos.length}
+          onExportBackup={() => exportAlbumBackup(photos)}
+          isSavingCloud={isSavingCloud}
         />
 
         {/* Dynamic Views */}

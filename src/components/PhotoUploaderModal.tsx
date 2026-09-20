@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { PhotoItem, Category } from '../types';
 import { compressImageFile } from '../utils/imageCompressor';
+import { matchPhotoMetadata } from '../utils/photoMatcher';
+import { exportAlbumBackup } from '../utils/storage';
 import {
   Upload,
   X,
@@ -12,6 +14,8 @@ import {
   Plus,
   Link as LinkIcon,
   Sparkles,
+  Download,
+  FolderUp,
 } from 'lucide-react';
 
 interface PhotoUploaderModalProps {
@@ -36,11 +40,13 @@ export const PhotoUploaderModal: React.FC<PhotoUploaderModalProps> = ({
   const [mode, setMode] = useState<'replace' | 'append'>(initialMode);
   const [dragActive, setDragActive] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [processingProgress, setProcessingProgress] = useState<{ current: number; total: number } | null>(null);
   const [stagedPhotos, setStagedPhotos] = useState<PhotoItem[]>([]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [urlInput, setUrlInput] = useState('');
   const [urlTitle, setUrlTitle] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const jsonInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
 
@@ -48,53 +54,63 @@ export const PhotoUploaderModal: React.FC<PhotoUploaderModalProps> = ({
     if (!files || files.length === 0) return;
     setLoading(true);
     setSuccessMessage(null);
+    setProcessingProgress({ current: 0, total: files.length });
 
     const newPhotos: PhotoItem[] = [];
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
+      setProcessingProgress({ current: i + 1, total: files.length });
+
       if (!file.type.startsWith('image/')) continue;
 
       const dataUrl = await compressImageFile(file);
       if (!dataUrl) continue;
 
-      // Format nice title from file name
-      const cleanName = file.name
-        .replace(/\.[^/.]+$/, '')
-        .replace(/[-_]/g, ' ')
-        .replace(/\bIMG\b/gi, 'Foto')
-        .replace(/\bWA\d+\b/gi, 'Momento Especial')
-        .trim();
-
-      // Guess category based on file name if possible
-      let guessedCategory: Category = 'casal';
-      const lower = file.name.toLowerCase();
-      if (lower.includes('adriana') || lower.includes('noiva') || lower.includes('ela')) {
-        guessedCategory = 'adriana';
-      } else if (lower.includes('igor') || lower.includes('noivo') || lower.includes('ele')) {
-        guessedCategory = 'igor';
-      } else if (lower.includes('alianca') || lower.includes('anel') || lower.includes('ceu') || lower.includes('mar')) {
-        guessedCategory = 'especial';
-      }
+      // Smart match to predefined titles and descriptions for Igor and Adriana
+      const matched = matchPhotoMetadata(file.name, i);
 
       newPhotos.push({
         id: `photo-user-${Date.now()}-${i}-${Math.random().toString(36).substr(2, 5)}`,
-        title: cleanName || `Momento Igor & Adriana ${i + 1}`,
-        subtitle: 'Foto do Álbum',
-        category: guessedCategory,
-        date: new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }),
-        location: 'Álbum Igor e Adriana',
+        title: matched.title || `Momento Igor & Adriana ${i + 1}`,
+        subtitle: matched.subtitle || 'Foto do Álbum',
+        category: matched.category || 'casal',
+        date: matched.date || new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }),
+        location: matched.location || 'Álbum Igor e Adriana',
         src: dataUrl,
-        description: `Registro fotográfico adicionado com amor ao álbum de memórias de Igor e Adriana (${file.name}).`,
-        isFavorite: false,
-        aspectRatio: 'portrait',
+        description: matched.description || `Registro fotográfico adicionado com amor ao álbum (${file.name}).`,
+        isFavorite: matched.isFavorite ?? false,
+        aspectRatio: matched.aspectRatio || 'portrait',
+        quote: matched.quote,
       });
     }
 
     if (newPhotos.length > 0) {
       setStagedPhotos((prev) => [...prev, ...newPhotos]);
     }
+    setProcessingProgress(null);
     setLoading(false);
+  };
+
+  const handleJsonBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target?.result as string);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setStagedPhotos(parsed);
+          setSuccessMessage(`Backup com ${parsed.length} fotos carregado com sucesso! Clique abaixo para aplicar.`);
+        } else {
+          alert('Arquivo JSON inválido. Certifique-se de usar um arquivo exportado deste álbum.');
+        }
+      } catch {
+        alert('Não foi possível ler o arquivo de backup.');
+      }
+    };
+    reader.readAsText(file);
   };
 
   const handleAddFromUrl = () => {
@@ -334,11 +350,50 @@ export const PhotoUploaderModal: React.FC<PhotoUploaderModalProps> = ({
             </div>
           )}
 
-          {loading && (
+          {/* Progress bar during processing */}
+          {processingProgress && (
+            <div className="p-3 rounded-lg bg-[#181510] border border-[#d4af37]/40">
+              <div className="flex items-center justify-between text-xs text-[#ffd97d] mb-1 font-cinzel">
+                <span>Otimizando e preparando fotos para o banco...</span>
+                <span>{processingProgress.current} de {processingProgress.total}</span>
+              </div>
+              <div className="w-full h-2 rounded-full bg-[#0a0a0c] overflow-hidden border border-[#382f20]">
+                <div
+                  className="h-full bg-gradient-to-r from-[#d4af37] to-[#ffd97d] transition-all duration-200"
+                  style={{ width: `${(processingProgress.current / processingProgress.total) * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          {loading && !processingProgress && (
             <div className="text-center text-xs text-[#d4af37] font-cinzel py-2">
               Processando e otimizando fotografias...
             </div>
           )}
+
+          {/* Backup / Export Section */}
+          <div className="pt-2 border-t border-[#262016] flex items-center justify-between">
+            <span className="text-[11px] text-[#8e8170]">Backup permanente do álbum:</span>
+            <div className="flex items-center space-x-2">
+              <input
+                ref={jsonInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleJsonBackup}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => jsonInputRef.current?.click()}
+                className="flex items-center space-x-1 px-2.5 py-1 rounded bg-[#17151a] border border-[#382f20] text-[11px] text-[#c5a059] hover:bg-[#252119] transition-all"
+                title="Restaurar álbum a partir de arquivo de backup JSON"
+              >
+                <FolderUp className="w-3 h-3" />
+                <span>Restaurar Backup (.json)</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Footer Actions */}
@@ -346,7 +401,7 @@ export const PhotoUploaderModal: React.FC<PhotoUploaderModalProps> = ({
           <button
             id="reset-album-btn"
             onClick={() => {
-              if (confirm('Deseja restaurar as memórias originais do álbum?')) {
+              if (confirm('Deseja restaurar as fotos originais do álbum?')) {
                 onResetPhotos();
                 onClose();
               }
@@ -354,7 +409,7 @@ export const PhotoUploaderModal: React.FC<PhotoUploaderModalProps> = ({
             className="flex items-center space-x-1.5 px-3 py-1.5 rounded text-xs font-cinzel text-[#ff7675] hover:bg-[#3d1818]/40 border border-[#5a2121]/60 transition-colors"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            <span>Restaurar Fotos Originais</span>
+            <span>Restaurar Originais</span>
           </button>
 
           <div className="flex items-center space-x-2 ml-auto">

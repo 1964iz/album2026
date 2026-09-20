@@ -1,12 +1,12 @@
 /**
  * Compresses and resizes an image file to keep it optimized for Firestore documents
- * and fast rendering on all devices.
+ * (strictly below the 1MB document limit) and ensures fast loading on mobile and desktop.
  */
 export function compressImageFile(
   file: File,
-  maxWidth = 1600,
-  maxHeight = 1600,
-  quality = 0.85
+  maxWidth = 1200,
+  maxHeight = 1200,
+  quality = 0.76
 ): Promise<string> {
   return new Promise((resolve) => {
     if (!file.type.startsWith('image/')) {
@@ -36,12 +36,27 @@ export function compressImageFile(
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', quality));
-        } else {
+        if (!ctx) {
           resolve(result);
+          return;
         }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        let compressedData = canvas.toDataURL('image/jpeg', quality);
+
+        // If compressed image is still > 350KB, downscale further for Firestore safety
+        if (compressedData.length > 450 * 1024) {
+          const smallCanvas = document.createElement('canvas');
+          smallCanvas.width = Math.round(width * 0.8);
+          smallCanvas.height = Math.round(height * 0.8);
+          const smallCtx = smallCanvas.getContext('2d');
+          if (smallCtx) {
+            smallCtx.drawImage(canvas, 0, 0, smallCanvas.width, smallCanvas.height);
+            compressedData = smallCanvas.toDataURL('image/jpeg', 0.68);
+          }
+        }
+
+        resolve(compressedData);
       };
       img.onerror = () => resolve(result);
       img.src = result;

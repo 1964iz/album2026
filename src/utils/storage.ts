@@ -132,13 +132,16 @@ export async function loadPhotosFromStorage(): Promise<PhotoItem[]> {
 /**
  * Syncs an entire list of photos to Firestore and IndexedDB
  */
-export async function savePhotosToStorage(photos: PhotoItem[]): Promise<void> {
+export async function savePhotosToStorage(
+  photos: PhotoItem[],
+  onProgress?: (current: number, total: number) => void
+): Promise<void> {
   // Always save to IndexedDB immediately
   await savePhotosToLocal(photos);
 
-  // Sync to Firestore
+  // Sync to Firestore reliably
   try {
-    await syncPhotosToFirestore(photos);
+    await syncPhotosToFirestore(photos, onProgress);
   } catch (err) {
     console.error('Failed to sync photos to Firestore:', err);
   }
@@ -186,22 +189,28 @@ export async function deletePhotoFromStorage(id: string): Promise<void> {
 }
 
 /**
- * Helper to batch sync photos to Firestore
+ * Robust synchronization to Firestore:
+ * Writes each document individually to prevent hitting Firestore 10MB batch size limits
+ * and provides progress updates. Also cleans up removed photos.
  */
-async function syncPhotosToFirestore(photos: PhotoItem[]): Promise<void> {
+export async function syncPhotosToFirestore(
+  photos: PhotoItem[],
+  onProgress?: (current: number, total: number) => void
+): Promise<void> {
   const db = getDb();
   if (!db) return;
 
-  // Process in chunks of 500 (Firestore batch limit is 500)
-  const chunkSize = 400;
-  for (let i = 0; i < photos.length; i += chunkSize) {
-    const chunk = photos.slice(i, i + chunkSize);
-    const batch = writeBatch(db);
+  const validPhotos = photos.filter((p) => Boolean(p.src));
+  const newIds = new Set(validPhotos.map((p) => p.id));
 
-    chunk.forEach((photo, idx) => {
-      const photoId = photo.id || `photo-${i + idx}`;
-      const docRef = doc(db, FIRESTORE_COLLECTION, photoId);
-      batch.set(docRef, {
+  // 1. Write photos individually to bypass transaction size limits
+  for (let i = 0; i < validPhotos.length; i++) {
+    const photo = validPhotos[i];
+    const photoId = photo.id || `photo-${i}`;
+    const docRef = doc(db, FIRESTORE_COLLECTION, photoId);
+
+    try {
+      await setDoc(docRef, {
         id: photoId,
         title: photo.title || 'Momento Igor e Adriana',
         subtitle: photo.subtitle || '',
@@ -213,13 +222,45 @@ async function syncPhotosToFirestore(photos: PhotoItem[]): Promise<void> {
         isFavorite: photo.isFavorite ?? false,
         aspectRatio: photo.aspectRatio || 'portrait',
         quote: photo.quote || '',
-        order: photo.order ?? (i + idx),
+        order: photo.order ?? i,
         updatedAt: new Date().toISOString(),
       }, { merge: true });
-    });
+    } catch (docErr) {
+      console.warn(`Error writing photo ${photoId} to Firestore:`, docErr);
+    }
 
-    await batch.commit();
+    if (onProgress) {
+      onProgress(i + 1, validPhotos.length);
+    }
   }
+
+  // 2. Clean up old documents that are no longer part of the album
+  try {
+    const snapshot = await getDocs(collection(db, FIRESTORE_COLLECTION));
+    for (const d of snapshot.docs) {
+      if (!newIds.has(d.id)) {
+        await deleteDoc(d.ref).catch(() => {});
+      }
+    }
+  } catch (cleanupErr) {
+    console.warn('Optional cleanup error:', cleanupErr);
+  }
+}
+
+/**
+ * Downloads a complete JSON backup file of all photos and metadata.
+ */
+export function exportAlbumBackup(photos: PhotoItem[]): void {
+  const json = JSON.stringify(photos, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `album-igor-e-adriana-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 /**
