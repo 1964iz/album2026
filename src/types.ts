@@ -16,4 +16,5 @@ export interface PhotoItem {
   isFavorite?: boolean;
   aspectRatio?: 'portrait' | 'landscape' | 'square';
   quote?: string;
+  order?: number;
 }

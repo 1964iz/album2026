@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PhotoItem, FrameStyle } from '../types';
 import { ClassicalFrame } from './ClassicalFrame';
+import { compressImageFile } from '../utils/imageCompressor';
 import {
   X,
   ChevronLeft,
@@ -44,11 +45,8 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
     const file = e.target.files?.[0];
     if (!file || !photo || !onReplaceSinglePhoto) return;
 
-    const dataUrl = await new Promise<string>((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.readAsDataURL(file);
-    });
+    const dataUrl = await compressImageFile(file);
+    if (!dataUrl) return;
 
     const cleanTitle = file.name
       .replace(/\.[^/.]+$/, '')

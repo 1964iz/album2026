@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { PhotoItem, FrameStyle } from '../types';
 import { ClassicalFrame } from './ClassicalFrame';
+import { compressImageFile } from '../utils/imageCompressor';
 
 interface PhotoCarouselProps {
   photos: PhotoItem[];
@@ -57,11 +58,8 @@ export const PhotoCarousel: React.FC<PhotoCarouselProps> = ({
     const file = e.target.files?.[0];
     if (!file || !currentPhoto || !onReplaceSinglePhoto) return;
 
-    const dataUrl = await new Promise<string>((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.readAsDataURL(file);
-    });
+    const dataUrl = await compressImageFile(file);
+    if (!dataUrl) return;
 
     const cleanTitle = file.name
       .replace(/\.[^/.]+$/, '')

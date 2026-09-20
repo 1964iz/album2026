@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { PhotoItem, Category } from '../types';
+import { compressImageFile } from '../utils/imageCompressor';
 import {
   Upload,
   X,
@@ -54,11 +55,8 @@ export const PhotoUploaderModal: React.FC<PhotoUploaderModalProps> = ({
       const file = files[i];
       if (!file.type.startsWith('image/')) continue;
 
-      const dataUrl = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(file);
-      });
+      const dataUrl = await compressImageFile(file);
+      if (!dataUrl) continue;
 
       // Format nice title from file name
       const cleanName = file.name

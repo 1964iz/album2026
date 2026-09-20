@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { PhotoItem, ViewMode, FrameStyle } from './types';
 import { INITIAL_PHOTOS } from './data/initialPhotos';
-import { loadPhotosFromStorage, savePhotosToStorage } from './utils/storage';
+import {
+  loadPhotosFromStorage,
+  savePhotosToStorage,
+  saveSinglePhotoToStorage,
+  deletePhotoFromStorage,
+  subscribeToPhotos,
+} from './utils/storage';
 import { romanticAudio } from './utils/audio';
 import { Header } from './components/Header';
 import { PhotoCarousel } from './components/PhotoCarousel';
@@ -23,15 +29,27 @@ export function App() {
   const [isPlayingMusic, setIsPlayingMusic] = useState<boolean>(false);
   const [isWindowDragActive, setIsWindowDragActive] = useState<boolean>(false);
 
-  // Load photos from IndexedDB on startup
+  // Load photos and subscribe to Cloud Firestore & local cache
   useEffect(() => {
+    let isMounted = true;
     async function initStorage() {
       const stored = await loadPhotosFromStorage();
-      if (stored && stored.length > 0) {
+      if (isMounted && stored && stored.length > 0) {
         setPhotos(stored);
       }
     }
     initStorage();
+
+    const unsubscribe = subscribeToPhotos((updatedPhotos) => {
+      if (isMounted && updatedPhotos && updatedPhotos.length > 0) {
+        setPhotos(updatedPhotos);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
   }, []);
 
   // Global Drag and Drop onto the window
@@ -78,10 +96,14 @@ export function App() {
   // Toggle favorite
   const handleToggleFavorite = (id: string) => {
     setPhotos((prev) => {
-      const updated = prev.map((p) =>
-        p.id === id ? { ...p, isFavorite: !p.isFavorite } : p
-      );
-      savePhotosToStorage(updated);
+      const updated = prev.map((p) => {
+        if (p.id === id) {
+          const item = { ...p, isFavorite: !p.isFavorite };
+          saveSinglePhotoToStorage(item);
+          return item;
+        }
+        return p;
+      });
       return updated;
     });
 
@@ -104,15 +126,16 @@ export function App() {
     setPhotos((prev) => {
       const updated = prev.map((p) => {
         if (p.id === id) {
-          return {
+          const item = {
             ...p,
             src: newSrc,
             title: newTitle ? newTitle : p.title,
           };
+          saveSinglePhotoToStorage(item);
+          return item;
         }
         return p;
       });
-      savePhotosToStorage(updated);
       return updated;
     });
 
@@ -133,7 +156,7 @@ export function App() {
   const handleDeletePhoto = (id: string) => {
     setPhotos((prev) => {
       const updated = prev.filter((p) => p.id !== id);
-      savePhotosToStorage(updated);
+      deletePhotoFromStorage(id);
       return updated;
     });
     setCurrentIndex((prev) => Math.max(0, Math.min(prev, photos.length - 2)));

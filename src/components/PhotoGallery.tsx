@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { PhotoItem, Category, FrameStyle } from '../types';
 import { ClassicalFrame } from './ClassicalFrame';
 import { Heart, Maximize2, Eye, Filter, Replace, Upload } from 'lucide-react';
+import { compressImageFile } from '../utils/imageCompressor';
 
 interface PhotoGalleryProps {
   photos: PhotoItem[];
@@ -31,11 +32,8 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
     const file = e.target.files?.[0];
     if (!file || !targetPhotoId || !onReplaceSinglePhoto) return;
 
-    const dataUrl = await new Promise<string>((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.readAsDataURL(file);
-    });
+    const dataUrl = await compressImageFile(file);
+    if (!dataUrl) return;
 
     const cleanTitle = file.name
       .replace(/\.[^/.]+$/, '')

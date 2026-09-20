@@ -1,0 +1,75 @@
+{
+  "entities": {
+    "photos": {
+      "title": "Photo",
+      "description": "Fotos do álbum de memórias de Igor e Adriana",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Identificador único da foto"
+        },
+        "title": {
+          "type": "string",
+          "description": "Título ou momento da fotografia"
+        },
+        "subtitle": {
+          "type": "string",
+          "description": "Subtítulo elegante da foto"
+        },
+        "category": {
+          "type": "string",
+          "description": "Categoria da fotografia (casal, adriana, igor, especial)"
+        },
+        "date": {
+          "type": "string",
+          "description": "Data do registro"
+        },
+        "location": {
+          "type": "string",
+          "description": "Localização do momento"
+        },
+        "src": {
+          "type": "string",
+          "description": "URL ou dados da imagem"
+        },
+        "description": {
+          "type": "string",
+          "description": "Descrição detalhada do momento"
+        },
+        "isFavorite": {
+          "type": "boolean",
+          "description": "Status de favorito da foto"
+        },
+        "aspectRatio": {
+          "type": "string",
+          "description": "Proporção de exibição (portrait, landscape, square)"
+        },
+        "quote": {
+          "type": "string",
+          "description": "Frase romântica ou citação associada"
+        },
+        "order": {
+          "type": "number",
+          "description": "Ordem sequencial da foto no álbum"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Data de atualização"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "src",
+        "order"
+      ]
+    }
+  },
+  "firestore": {
+    "/photos/{photoId}": {
+      "schema": "photos",
+      "description": "Coleção com todas as fotos sincronizadas do álbum de Igor e Adriana"
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ViewMode } from '../types';
-import { Sparkles, Music, VolumeX, Volume2, Upload, BookOpen, LayoutGrid, Image as ImageIcon, Replace } from 'lucide-react';
+import { Sparkles, Music, VolumeX, Volume2, Upload, BookOpen, LayoutGrid, Image as ImageIcon, Replace, Database } from 'lucide-react';
 
 interface HeaderProps {
   viewMode: ViewMode;
@@ -113,6 +113,16 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right Action Tools: Music & Upload / Replace */}
         <div className="flex items-center space-x-2">
+          {/* Cloud Database Synced Badge */}
+          <div
+            id="db-status-badge"
+            className="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-cinzel text-[#d4af37] bg-[#1a1712] border border-[#d4af37]/40 shadow-[0_0_8px_rgba(212,175,55,0.15)]"
+            title="Banco de dados Cloud Firestore ativo - Todas as fotos estão sincronizadas e seguras na nuvem"
+          >
+            <Database className="w-3.5 h-3.5 text-[#ffd97d]" />
+            <span className="text-[11px] tracking-wide">{photosCount} Fotos no Banco</span>
+          </div>
+
           {/* Ambient Music Button */}
           <button
             id="music-toggle-btn"
