@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { PhotoItem, Category, FrameStyle } from '../types';
+import React, { useState, useRef, useEffect } from 'react';
+import { PhotoItem, Category, FrameStyle, AlbumConfig } from '../types';
 import { ClassicalFrame } from './ClassicalFrame';
 import { Heart, Maximize2, Eye, Filter, Replace, Upload } from 'lucide-react';
 import { compressImageFile } from '../utils/imageCompressor';
@@ -7,26 +7,36 @@ import { compressImageFile } from '../utils/imageCompressor';
 interface PhotoGalleryProps {
   photos: PhotoItem[];
   frameStyle: FrameStyle;
+  onChangeFrameStyle?: (style: FrameStyle) => void;
   onSelectPhoto: (index: number) => void;
   onToggleFavorite: (id: string) => void;
   onOpenLightbox: (photo: PhotoItem) => void;
   onReplaceSinglePhoto?: (id: string, newSrc: string, newTitle?: string) => void;
   onOpenUploader?: (mode?: 'replace' | 'append') => void;
+  config?: AlbumConfig;
+  initialFavoritesOnly?: boolean;
 }
 
 export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
   photos,
   frameStyle,
+  onChangeFrameStyle,
   onSelectPhoto,
   onToggleFavorite,
   onOpenLightbox,
   onReplaceSinglePhoto,
   onOpenUploader,
+  config,
+  initialFavoritesOnly = false,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<Category>('todos');
-  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(initialFavoritesOnly);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [targetPhotoId, setTargetPhotoId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setShowOnlyFavorites(initialFavoritesOnly);
+  }, [initialFavoritesOnly]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -58,9 +68,8 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
 
   const categories: { id: Category; label: string }[] = [
     { id: 'todos', label: 'Todos os Momentos' },
-    { id: 'casal', label: 'O Casal' },
-    { id: 'adriana', label: 'Retratos de Adriana' },
-    { id: 'igor', label: 'Retratos de Igor' },
+    { id: 'casal', label: config?.coupleName ? `Casal (${config.coupleName})` : 'Casal' },
+    { id: 'modelo', label: config?.modelName ? `Modelo (${config.modelName})` : 'Ensaios & Modelos' },
     { id: 'especial', label: 'Momentos Especiais' },
   ];
 
@@ -86,8 +95,38 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
           ))}
         </div>
 
-        {/* Favorite filter toggle & Replace album button */}
-        <div className="flex items-center space-x-2">
+        {/* Favorite filter toggle, Frame style switcher & Replace album button */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Direct Borda Prateada / Dourada Switcher */}
+          {onChangeFrameStyle && (
+            <div className="flex items-center bg-[#141316] p-0.5 rounded-full border border-[#382f20]/60">
+              <button
+                id="gallery-silver-border-btn"
+                onClick={() => onChangeFrameStyle('imperial-silver')}
+                className={`px-2.5 py-1 text-[11px] font-cinzel rounded-full transition-all cursor-pointer ${
+                  frameStyle === 'imperial-silver'
+                    ? 'bg-gradient-to-r from-[#cfd8dc] to-[#78909c] text-[#0f1214] font-bold shadow-[0_0_10px_rgba(207,216,220,0.5)]'
+                    : 'text-[#9b8d78] hover:text-[#cfd8dc]'
+                }`}
+                title="Aplicar Borda Prateada em todas as imagens"
+              >
+                Borda Prateada
+              </button>
+              <button
+                id="gallery-gold-border-btn"
+                onClick={() => onChangeFrameStyle('baroque-gold')}
+                className={`px-2.5 py-1 text-[11px] font-cinzel rounded-full transition-all cursor-pointer ${
+                  frameStyle === 'baroque-gold'
+                    ? 'bg-gradient-to-r from-[#d4af37] to-[#aa7a2c] text-[#120f0a] font-bold shadow-[0_0_10px_rgba(212,175,55,0.4)]'
+                    : 'text-[#9b8d78] hover:text-[#ebd29b]'
+                }`}
+                title="Aplicar Borda Dourada Barroca em todas as imagens"
+              >
+                Borda Dourada
+              </button>
+            </div>
+          )}
+
           {onOpenUploader && (
             <button
               id="gallery-substitute-btn"
@@ -103,7 +142,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
           <button
             id="filter-favorites-btn"
             onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-cinzel border transition-all ${
+            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-cinzel border transition-all cursor-pointer ${
               showOnlyFavorites
                 ? 'bg-[#e74c3c]/20 text-[#ff7675] border-[#e74c3c]'
                 : 'bg-[#141316] text-[#a69680] border-[#382f20]/50 hover:border-[#c5a059]/60'

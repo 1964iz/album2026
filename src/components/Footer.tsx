@@ -1,19 +1,30 @@
 import React from 'react';
 import { Heart } from 'lucide-react';
+import { AlbumConfig } from '../types';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  config?: AlbumConfig;
+}
+
+export const Footer: React.FC<FooterProps> = ({ config }) => {
   return (
     <footer className="w-full relative z-20 py-12 px-4 text-center border-t border-[#241e15] mt-16 bg-[#080709]">
       <div className="max-w-md mx-auto flex flex-col items-center">
-        {/* Monogram */}
-        <p className="font-script text-3xl sm:text-4xl text-gold-gradient mb-1">
-          Igor & Adriana
+        {/* Studio IA Monogram */}
+        <p className="font-serif-display text-2xl sm:text-3xl font-bold text-gold-gradient mb-1">
+          {config?.studioName || 'Studio IA'}
         </p>
 
+        {config?.coupleName && (
+          <p className="text-xs font-cinzel text-[#ffd97d] mb-1">
+            Ensaio & Coleção: {config.coupleName}
+          </p>
+        )}
+
         <p className="font-cormorant italic text-sm text-[#a89781] tracking-widest flex items-center justify-center space-x-1.5">
-          <span>Eternizando os Melhores Capítulos</span>
+          <span>Eternizando os Melhores Momentos</span>
           <Heart className="w-3 h-3 text-[#c5a059] fill-[#c5a059]" />
-          <span>da Nossa História</span>
+          <span>em Alta Costura</span>
         </p>
 
         {/* Keyboard hints */}
@@ -32,3 +43,4 @@ export const Footer: React.FC = () => {
     </footer>
   );
 };
+

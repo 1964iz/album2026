@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PhotoItem, FrameStyle } from '../types';
+import { PhotoItem, FrameStyle, AlbumConfig } from '../types';
 import { ClassicalFrame } from './ClassicalFrame';
 import { ChevronLeft, ChevronRight, BookOpen, Quote, Calendar, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -8,12 +8,14 @@ interface BookViewProps {
   photos: PhotoItem[];
   frameStyle: FrameStyle;
   onOpenLightbox: (photo: PhotoItem) => void;
+  config?: AlbumConfig;
 }
 
 export const BookView: React.FC<BookViewProps> = ({
   photos,
   frameStyle,
   onOpenLightbox,
+  config,
 }) => {
   const [spreadIndex, setSpreadIndex] = useState(0);
 
@@ -163,9 +165,14 @@ export const BookView: React.FC<BookViewProps> = ({
                   <p className="font-cormorant text-lg sm:text-xl text-[#ded3c3] leading-relaxed max-w-md italic mb-6">
                     "Cada foto guarda um suspiro, cada instante ao seu lado é uma memória bordada a ouro no livro da nossa história."
                   </p>
-                  <p className="font-script text-3xl sm:text-4xl text-[#ebd29b] tracking-wider">
-                    Igor & Adriana
+                  <p className="font-serif-display font-bold text-2xl sm:text-3xl text-gold-gradient tracking-wider">
+                    {config?.studioName || 'Studio IA'}
                   </p>
+                  {config?.coupleName && (
+                    <p className="font-cinzel text-xs text-[#ffd97d] mt-1 tracking-widest">
+                      {config.coupleName}
+                    </p>
+                  )}
                   <div className="w-12 h-[1px] bg-[#d4af37] mt-6" />
                 </div>
               )}

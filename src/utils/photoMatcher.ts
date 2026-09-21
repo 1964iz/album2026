@@ -126,7 +126,7 @@ const KNOWN_METAS: KnownMeta[] = [
     category: 'casal',
     date: '19 de Setembro, 2026',
     location: 'Estúdio de Luz Natural',
-    description: 'Um pequeno detalhe no peito que resume a grandiosidade do sentimento que une Igor e Adriana.',
+    description: 'Um pequeno detalhe no peito que resume a grandiosidade do sentimento que une o casal.',
     aspectRatio: 'landscape',
     isFavorite: false,
   },
@@ -138,7 +138,7 @@ const KNOWN_METAS: KnownMeta[] = [
     category: 'especial',
     date: '19 de Setembro, 2026',
     location: 'Beira-Mar',
-    description: 'Adriana em vestido azul de renda traçando um coração na areia molhada com a mensagem de fé e gratidão.',
+    description: 'Ensaio fotográfico à beira-mar traçando um coração na areia molhada com mensagem de fé e gratidão.',
     quote: 'A fé sustenta cada passo e abençoa cada união.',
     aspectRatio: 'portrait',
     isFavorite: true,
@@ -147,8 +147,8 @@ const KNOWN_METAS: KnownMeta[] = [
     key: 'WA0033',
     match: (n) => n.includes('WA0033'),
     title: 'Pôr do Sol Dourado no Mar',
-    subtitle: 'A Serenidade de Adriana',
-    category: 'adriana',
+    subtitle: 'A Serenidade do Ensaio',
+    category: 'modelo',
     date: '19 de Setembro, 2026',
     location: 'Praia ao Entardecer',
     description: 'O perfil sereno contemplando o pôr do sol no horizonte marítimo, banhada pelos raios âmbar e lavanda.',
@@ -161,7 +161,7 @@ const KNOWN_METAS: KnownMeta[] = [
     match: (n) => n.includes('WA0036'),
     title: 'Rosa Magenta & Pétalas Vivas',
     subtitle: 'Elegância e Graça',
-    category: 'adriana',
+    category: 'modelo',
     date: '19 de Setembro, 2026',
     location: 'Ensaio Floral de Gala',
     description: 'Vestido fluido segurando um buquê suntuoso de rosas em harmonia com sua beleza encantadora.',
@@ -170,11 +170,11 @@ const KNOWN_METAS: KnownMeta[] = [
     isFavorite: true,
   },
   {
-    key: 'WA0037-adriana',
-    match: (n) => n.includes('WA0037') && (n.includes('0919') || n.includes('adriana') || !n.includes('0918')),
+    key: 'WA0037-flores',
+    match: (n) => n.includes('WA0037') && (n.includes('0919') || n.includes('flores') || !n.includes('0918')),
     title: 'Jardim de Rosas Carmesim',
     subtitle: 'Sorriso Entre as Flores',
-    category: 'adriana',
+    category: 'modelo',
     date: '19 de Setembro, 2026',
     location: 'Gramado Florido',
     description: 'Deitada sobre a relva verde cercada de rosas vermelhas desabrochadas, com um sorriso radiante.',
@@ -186,10 +186,10 @@ const KNOWN_METAS: KnownMeta[] = [
     match: (n) => n.includes('WA0038'),
     title: 'Olhar Radiante & Tons Quentes',
     subtitle: 'Close-Up de Beleza & Luz',
-    category: 'adriana',
+    category: 'modelo',
     date: '19 de Setembro, 2026',
     location: 'Estúdio Golden Hour',
-    description: 'Iluminação impecável realçando os olhos expressivos e a serenidade do sorriso de Adriana.',
+    description: 'Iluminação impecável realçando os olhos expressivos e a serenidade do sorriso da modelo.',
     aspectRatio: 'portrait',
     isFavorite: false,
   },
@@ -198,7 +198,7 @@ const KNOWN_METAS: KnownMeta[] = [
     match: (n) => n.includes('WA0039'),
     title: 'Charme & Sofisticação em Preto',
     subtitle: 'Elegância Clássica',
-    category: 'adriana',
+    category: 'modelo',
     date: '19 de Setembro, 2026',
     location: 'Sessão Noir',
     description: 'A delicadeza do repouso nos braços e a elegância atemporal de um blazer preto refinado.',
@@ -210,7 +210,7 @@ const KNOWN_METAS: KnownMeta[] = [
     match: (n) => n.includes('WA0047'),
     title: 'Brisa Marítima & Brilho Dourado',
     subtitle: 'Espetáculo na Praia',
-    category: 'adriana',
+    category: 'modelo',
     date: '19 de Setembro, 2026',
     location: 'Litoral Paradisíaco',
     description: 'Vestido preto drapeado com fenda esvoaçante e detalhes luminosos sobre areias brancas.',
@@ -222,7 +222,7 @@ const KNOWN_METAS: KnownMeta[] = [
     match: (n) => n.includes('WA0049'),
     title: 'Estilo Moderno & Denim Couture',
     subtitle: 'Atitude & Beleza',
-    category: 'adriana',
+    category: 'modelo',
     date: '19 de Setembro, 2026',
     location: 'Espaço Fashion',
     description: 'Corset jeans com acabamento em strass brilhante e cinto de fivela solar, unindo modernidade e atitude.',
@@ -234,7 +234,7 @@ const KNOWN_METAS: KnownMeta[] = [
     match: (n) => n.includes('WA0076'),
     title: 'Retrato Clássico em Preto & Branco',
     subtitle: 'Foco, Visão & Firmeza',
-    category: 'igor',
+    category: 'modelo',
     date: '15 de Setembro, 2026',
     location: 'Estúdio Retratista Master',
     description: 'Luz e sombra magistrais em terno escuro, destacando o olhar reflexivo e a serenidade da maturidade.',
@@ -247,7 +247,7 @@ const KNOWN_METAS: KnownMeta[] = [
     match: (n) => n.includes('WA0082'),
     title: 'Enquadrando o Destino',
     subtitle: 'A Perspectiva do Fotógrafo',
-    category: 'igor',
+    category: 'modelo',
     date: '15 de Setembro, 2026',
     location: 'Noite Urbana Iluminada',
     description: 'Gesto criativo em gola alta preta emoldurando a visão, com bokeh de luzes noturnas ao fundo.',
@@ -259,7 +259,7 @@ const KNOWN_METAS: KnownMeta[] = [
     match: (n) => n.includes('WA0084'),
     title: 'Viagem a Milão — Piazza del Duomo',
     subtitle: 'Catedral Gótica & História',
-    category: 'igor',
+    category: 'especial',
     date: '15 de Setembro, 2026',
     location: 'Milão, Itália',
     description: 'A grandiosidade dos detalhes em mármore da Catedral de Milão compondo o cenário de um dia memorável.',
@@ -271,7 +271,7 @@ const KNOWN_METAS: KnownMeta[] = [
     match: (n) => n.includes('WA0054'),
     title: 'Aviação Executiva & Novos Horizontes',
     subtitle: 'Lounge VIP ao Pôr do Sol',
-    category: 'igor',
+    category: 'modelo',
     date: '16 de Setembro, 2026',
     location: 'Terminal Executivo Privado',
     description: 'Traje alinhado com óculos de lentes degradê e a pista de decolagem anunciando novos destinos.',
@@ -283,10 +283,10 @@ const KNOWN_METAS: KnownMeta[] = [
     match: (n) => n.includes('WA0001'),
     title: 'Companhia Leal & Momentos Espontâneos',
     subtitle: 'Tarde com o Felino Laranja',
-    category: 'igor',
+    category: 'especial',
     date: '17 de Setembro, 2026',
     location: 'Estúdio Terracota',
-    description: 'O contraste da serenidade de Igor com a curiosidade travessa do gato ruivo em primeiro plano.',
+    description: 'O contraste da serenidade do modelo com a curiosidade travessa do gato ruivo em primeiro plano.',
     aspectRatio: 'portrait',
     isFavorite: false,
   },
@@ -295,7 +295,7 @@ const KNOWN_METAS: KnownMeta[] = [
     match: (n) => n.includes('WA0013'),
     title: 'Dupla Exposição — Vinho & Natureza',
     subtitle: 'Arte Surrealista & Essência',
-    category: 'igor',
+    category: 'especial',
     date: '17 de Setembro, 2026',
     location: 'Galeria Conceitual',
     description: 'Composição artística unindo a degustação de um bom vinho e a imensidão verde de florestas secretas.',
@@ -307,7 +307,7 @@ const KNOWN_METAS: KnownMeta[] = [
     match: (n) => n.includes('WA0009'),
     title: 'Aconchego & Sorriso Sincero',
     subtitle: 'Tons de Esmeralda & Âmbar',
-    category: 'igor',
+    category: 'modelo',
     date: '18 de Setembro, 2026',
     location: 'Ambiente Lounge',
     description: 'Um retrato caloroso em gola alta preta com iluminação suave em tons de cobre e turquesa.',
@@ -315,21 +315,21 @@ const KNOWN_METAS: KnownMeta[] = [
     isFavorite: false,
   },
   {
-    key: 'WA0037-igor',
-    match: (n) => n.includes('WA0037') && (n.includes('0918') || n.includes('igor') || n.includes('google')),
-    title: 'Inovação & Espírito Google',
+    key: 'WA0037-inovacao',
+    match: (n) => n.includes('WA0037') && (n.includes('0918') || n.includes('inovacao') || n.includes('estudio')),
+    title: 'Inovação & Criatividade',
     subtitle: 'Tecnologia com Alma',
-    category: 'igor',
+    category: 'modelo',
     date: '18 de Setembro, 2026',
     location: 'Espaço de Criação',
-    description: 'Polo branca com o icônico emblema, traduzindo paixão pelo futuro, conexão e inteligência.',
+    description: 'Polo branca traduzindo paixão pelo futuro, conexão, estética e inteligência.',
     aspectRatio: 'portrait',
     isFavorite: false,
   },
 ];
 
 /**
- * Matches a filename to its corresponding poetic metadata in the Igor & Adriana album
+ * Matches a filename to its corresponding poetic metadata in the Studio IA album
  */
 export function matchPhotoMetadata(fileName: string, index = 0): Partial<PhotoItem> {
   const match = KNOWN_METAS.find((item) => item.match(fileName));
@@ -358,21 +358,19 @@ export function matchPhotoMetadata(fileName: string, index = 0): Partial<PhotoIt
 
   let category: PhotoCategory = 'casal';
   const lower = fileName.toLowerCase();
-  if (lower.includes('adriana') || lower.includes('noiva') || lower.includes('ela')) {
-    category = 'adriana';
-  } else if (lower.includes('igor') || lower.includes('noivo') || lower.includes('ele')) {
-    category = 'igor';
-  } else if (lower.includes('alianca') || lower.includes('jesus') || lower.includes('ceu')) {
+  if (lower.includes('modelo') || lower.includes('ensaio') || lower.includes('retrato') || lower.includes('noiva') || lower.includes('noivo')) {
+    category = 'modelo';
+  } else if (lower.includes('alianca') || lower.includes('jesus') || lower.includes('ceu') || lower.includes('especial')) {
     category = 'especial';
   }
 
   return {
-    title: cleanName || `Momento Igor & Adriana ${index + 1}`,
+    title: cleanName || `Momento Studio IA ${index + 1}`,
     subtitle: 'Memória Eterna',
     category,
     date: new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }),
-    location: 'Álbum Igor e Adriana',
-    description: `Registro fotográfico adicionado com amor ao álbum de Igor e Adriana (${fileName}).`,
+    location: 'Álbum Studio IA',
+    description: `Registro fotográfico adicionado com amor ao álbum Studio IA (${fileName}).`,
     aspectRatio: 'portrait',
     isFavorite: false,
   };

@@ -67,18 +67,18 @@ export const PhotoUploaderModal: React.FC<PhotoUploaderModalProps> = ({
       const dataUrl = await compressImageFile(file);
       if (!dataUrl) continue;
 
-      // Smart match to predefined titles and descriptions for Igor and Adriana
+      // Smart match to predefined titles and descriptions for Studio IA
       const matched = matchPhotoMetadata(file.name, i);
 
       newPhotos.push({
         id: `photo-user-${Date.now()}-${i}-${Math.random().toString(36).substr(2, 5)}`,
-        title: matched.title || `Momento Igor & Adriana ${i + 1}`,
+        title: matched.title || `Momento Studio IA ${i + 1}`,
         subtitle: matched.subtitle || 'Foto do Álbum',
         category: matched.category || 'casal',
         date: matched.date || new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }),
-        location: matched.location || 'Álbum Igor e Adriana',
+        location: matched.location || 'Coleção Studio IA',
         src: dataUrl,
-        description: matched.description || `Registro fotográfico adicionado com amor ao álbum (${file.name}).`,
+        description: matched.description || `Registro fotográfico adicionado com amor ao álbum Studio IA (${file.name}).`,
         isFavorite: matched.isFavorite ?? false,
         aspectRatio: matched.aspectRatio || 'portrait',
         quote: matched.quote,
@@ -118,13 +118,13 @@ export const PhotoUploaderModal: React.FC<PhotoUploaderModalProps> = ({
 
     const newPhoto: PhotoItem = {
       id: `photo-url-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-      title: urlTitle.trim() || `Momento Igor & Adriana ${stagedPhotos.length + 1}`,
+      title: urlTitle.trim() || `Momento Studio IA ${stagedPhotos.length + 1}`,
       subtitle: 'Memória Importada',
       category: 'casal',
       date: new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }),
-      location: 'Coleção Igor e Adriana',
+      location: 'Coleção Studio IA',
       src: urlInput.trim(),
-      description: 'Fotografia especial incluída no álbum de Igor e Adriana.',
+      description: 'Fotografia especial incluída no álbum Studio IA.',
       isFavorite: false,
       aspectRatio: 'portrait',
     };
@@ -201,7 +201,7 @@ export const PhotoUploaderModal: React.FC<PhotoUploaderModalProps> = ({
             Inserir Fotos no Álbum
           </h3>
           <p className="font-cormorant text-sm sm:text-base text-[#d1c5b4] mt-1">
-            Substitua as imagens atuais pelas fotos reais de Igor e Adriana
+            Adicione ou substitua as imagens do álbum Studio IA
           </p>
         </div>
 
@@ -397,52 +397,36 @@ export const PhotoUploaderModal: React.FC<PhotoUploaderModalProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="mt-4 pt-4 border-t border-[#2a241b] flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <div className="mt-4 pt-4 border-t border-[#2a241b] flex items-center justify-end gap-3 shrink-0">
           <button
-            id="reset-album-btn"
-            onClick={() => {
-              if (confirm('Deseja restaurar as fotos originais do álbum?')) {
-                onResetPhotos();
-                onClose();
-              }
-            }}
-            className="flex items-center space-x-1.5 px-3 py-1.5 rounded text-xs font-cinzel text-[#ff7675] hover:bg-[#3d1818]/40 border border-[#5a2121]/60 transition-colors"
+            onClick={onClose}
+            className="px-4 py-2 rounded-full border border-[#382f20] text-xs font-cinzel text-[#9e907c] hover:text-[#ebd29b] cursor-pointer"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Restaurar Originais</span>
+            Cancelar
           </button>
 
-          <div className="flex items-center space-x-2 ml-auto">
+          {stagedPhotos.length > 0 ? (
             <button
-              onClick={onClose}
-              className="px-4 py-2 rounded-full border border-[#382f20] text-xs font-cinzel text-[#9e907c] hover:text-[#ebd29b]"
+              id="confirm-substitute-btn"
+              onClick={handleApply}
+              className="flex items-center space-x-1.5 px-5 py-2 rounded-full bg-gradient-to-r from-[#d4af37] via-[#ffd97d] to-[#aa7a2c] text-[#120f0a] font-cinzel text-xs font-bold shadow-[0_0_15px_rgba(212,175,55,0.5)] hover:brightness-110 transition-all cursor-pointer"
             >
-              Cancelar
+              <Replace className="w-4 h-4" />
+              <span>
+                {mode === 'replace'
+                  ? `Substituir Álbum (${stagedPhotos.length} fotos)`
+                  : `Adicionar ${stagedPhotos.length} Fotos`}
+              </span>
             </button>
-
-            {stagedPhotos.length > 0 ? (
-              <button
-                id="confirm-substitute-btn"
-                onClick={handleApply}
-                className="flex items-center space-x-1.5 px-5 py-2 rounded-full bg-gradient-to-r from-[#d4af37] via-[#ffd97d] to-[#aa7a2c] text-[#120f0a] font-cinzel text-xs font-bold shadow-[0_0_15px_rgba(212,175,55,0.5)] hover:brightness-110 transition-all"
-              >
-                <Replace className="w-4 h-4" />
-                <span>
-                  {mode === 'replace'
-                    ? `Substituir Álbum (${stagedPhotos.length} fotos)`
-                    : `Adicionar ${stagedPhotos.length} Fotos`}
-                </span>
-              </button>
-            ) : (
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center space-x-1.5 px-5 py-2 rounded-full bg-[#241f17] border border-[#d4af37]/50 text-[#f5dfa8] font-cinzel text-xs font-semibold hover:bg-[#382f20] transition-all"
-              >
-                <Upload className="w-3.5 h-3.5 text-[#d4af37]" />
-                <span>Escolher Arquivos</span>
-              </button>
-            )}
-          </div>
+          ) : (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center space-x-1.5 px-5 py-2 rounded-full bg-[#241f17] border border-[#d4af37]/50 text-[#f5dfa8] font-cinzel text-xs font-semibold hover:bg-[#382f20] transition-all cursor-pointer"
+            >
+              <Upload className="w-3.5 h-3.5 text-[#d4af37]" />
+              <span>Escolher Arquivos</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

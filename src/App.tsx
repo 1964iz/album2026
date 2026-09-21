@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PhotoItem, ViewMode, FrameStyle } from './types';
+import { PhotoItem, ViewMode, FrameStyle, ClientOrder, AlbumConfig } from './types';
 import { INITIAL_PHOTOS } from './data/initialPhotos';
 import {
   loadPhotosFromStorage,
@@ -8,19 +8,28 @@ import {
   deletePhotoFromStorage,
   subscribeToPhotos,
   exportAlbumBackup,
+  loadStoredAlbumConfig,
+  saveStoredAlbumConfig,
+  DEFAULT_ALBUM_CONFIG,
 } from './utils/storage';
+import { loadClientsFromStorage } from './utils/clientStorage';
 import { romanticAudio } from './utils/audio';
 import { Header } from './components/Header';
 import { PhotoCarousel } from './components/PhotoCarousel';
 import { PhotoGallery } from './components/PhotoGallery';
+import { FavoritesView } from './components/FavoritesView';
 import { BookView } from './components/BookView';
+import { ClientReportsView } from './components/ClientReportsView';
 import { LightboxModal } from './components/LightboxModal';
 import { PhotoUploaderModal } from './components/PhotoUploaderModal';
+import { AlbumNamesModal } from './components/AlbumNamesModal';
+import { MusicModal } from './components/MusicModal';
 import { AmbientCanvas } from './components/AmbientCanvas';
 import { Footer } from './components/Footer';
 
 export function App() {
   const [photos, setPhotos] = useState<PhotoItem[]>(INITIAL_PHOTOS);
+  const [clients, setClients] = useState<ClientOrder[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [viewMode, setViewMode] = useState<ViewMode>('carousel');
   const [frameStyle, setFrameStyle] = useState<FrameStyle>('baroque-gold');
@@ -30,6 +39,17 @@ export function App() {
   const [isPlayingMusic, setIsPlayingMusic] = useState<boolean>(false);
   const [isWindowDragActive, setIsWindowDragActive] = useState<boolean>(false);
   const [isSavingCloud, setIsSavingCloud] = useState<boolean>(false);
+  const [config, setConfig] = useState<AlbumConfig>(loadStoredAlbumConfig);
+  const [isNamesModalOpen, setIsNamesModalOpen] = useState<boolean>(false);
+  const [isMusicModalOpen, setIsMusicModalOpen] = useState<boolean>(false);
+
+  // Sync audio play status
+  useEffect(() => {
+    const unsub = romanticAudio.subscribe((playing) => {
+      setIsPlayingMusic(playing);
+    });
+    return () => unsub();
+  }, []);
 
   // Load photos and subscribe to Cloud Firestore & local cache
   useEffect(() => {
@@ -38,6 +58,10 @@ export function App() {
       const stored = await loadPhotosFromStorage();
       if (isMounted && stored && stored.length > 0) {
         setPhotos(stored);
+      }
+      const loadedClients = await loadClientsFromStorage();
+      if (isMounted && loadedClients) {
+        setClients(loadedClients);
       }
     }
     initStorage();
@@ -53,6 +77,11 @@ export function App() {
       unsubscribe();
     };
   }, []);
+
+  const handleRefreshClients = async () => {
+    const list = await loadClientsFromStorage();
+    setClients(list);
+  };
 
   // Global Drag and Drop onto the window
   useEffect(() => {
@@ -200,7 +229,7 @@ export function App() {
     setCurrentIndex(0);
   };
 
-  // Reset to initial photos
+  // Reset to initial photos / models
   const handleResetPhotos = async () => {
     setPhotos(INITIAL_PHOTOS);
     setIsSavingCloud(true);
@@ -223,6 +252,11 @@ export function App() {
     setIsUploaderOpen(true);
   };
 
+  const handleSaveConfig = (newConfig: AlbumConfig) => {
+    setConfig(newConfig);
+    saveStoredAlbumConfig(newConfig);
+  };
+
   return (
     <div className="relative min-h-screen bg-[#070709] text-[#f2ede4] flex flex-col justify-between overflow-x-hidden">
       {/* Background Animated Starlight / Golden Dust Particles */}
@@ -236,7 +270,7 @@ export function App() {
               Solte as Fotos Aqui
             </h2>
             <p className="font-cormorant text-lg text-[#ebd29b]">
-              Substitua instantaneamente o álbum de Igor e Adriana pelas suas novas imagens
+              Substitua instantaneamente o álbum Studio IA pelas suas novas imagens
             </p>
           </div>
         </div>
@@ -244,14 +278,18 @@ export function App() {
 
       {/* Main Container */}
       <div className="relative z-10 w-full flex flex-col flex-1">
-        {/* Header with Title "Igor e Adriana" in elegant typography */}
+        {/* Header with Title Studio IA in elegant typography */}
         <Header
           viewMode={viewMode}
           onChangeViewMode={setViewMode}
           isPlayingMusic={isPlayingMusic}
           onToggleMusic={handleToggleMusic}
+          onOpenMusicModal={() => setIsMusicModalOpen(true)}
           onOpenUploader={handleOpenUploader}
           photosCount={photos.length}
+          favoritesCount={photos.filter((p) => p.isFavorite).length}
+          config={config}
+          onOpenNamesModal={() => setIsNamesModalOpen(true)}
           onExportBackup={() => exportAlbumBackup(photos)}
           isSavingCloud={isSavingCloud}
         />
@@ -277,6 +315,7 @@ export function App() {
             <PhotoGallery
               photos={photos}
               frameStyle={frameStyle}
+              onChangeFrameStyle={setFrameStyle}
               onSelectPhoto={(idx) => {
                 setCurrentIndex(idx);
                 setViewMode('carousel');
@@ -285,6 +324,23 @@ export function App() {
               onOpenLightbox={setLightboxPhoto}
               onReplaceSinglePhoto={handleReplaceSinglePhoto}
               onOpenUploader={handleOpenUploader}
+              config={config}
+            />
+          )}
+
+          {viewMode === 'favorites' && (
+            <FavoritesView
+              photos={photos}
+              frameStyle={frameStyle}
+              onSelectPhoto={(idx) => {
+                setCurrentIndex(idx);
+                setViewMode('carousel');
+              }}
+              onToggleFavorite={handleToggleFavorite}
+              onOpenLightbox={setLightboxPhoto}
+              onGoToGallery={() => setViewMode('gallery')}
+              onGoToBook={() => setViewMode('book')}
+              config={config}
             />
           )}
 
@@ -293,12 +349,21 @@ export function App() {
               photos={photos}
               frameStyle={frameStyle}
               onOpenLightbox={setLightboxPhoto}
+              config={config}
+            />
+          )}
+
+          {viewMode === 'reports' && (
+            <ClientReportsView
+              clients={clients}
+              onRefreshClients={handleRefreshClients}
+              isSavingCloud={isSavingCloud}
             />
           )}
         </main>
 
         {/* Footer */}
-        <Footer />
+        <Footer config={config} />
       </div>
 
       {/* Fullscreen Lightbox Modal */}
@@ -321,6 +386,22 @@ export function App() {
         onResetPhotos={handleResetPhotos}
         currentCount={photos.length}
         initialMode={uploaderMode}
+      />
+
+      {/* Album Names (Couple & Model) Customization Modal */}
+      <AlbumNamesModal
+        isOpen={isNamesModalOpen}
+        onClose={() => setIsNamesModalOpen(false)}
+        config={config}
+        onSaveConfig={handleSaveConfig}
+      />
+
+      {/* Custom Music & Soundtrack Modal */}
+      <MusicModal
+        isOpen={isMusicModalOpen}
+        onClose={() => setIsMusicModalOpen(false)}
+        isPlaying={isPlayingMusic}
+        onTogglePlay={handleToggleMusic}
       />
     </div>
   );

@@ -64,12 +64,91 @@
         "src",
         "order"
       ]
+    },
+    "clients": {
+      "title": "ClientOrder",
+      "description": "Relatório de clientes, pedidos de álbuns, valores contratados e formas de pagamento",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID único do cliente ou pedido"
+        },
+        "clientName": {
+          "type": "string",
+          "description": "Nome completo do cliente"
+        },
+        "clientPhone": {
+          "type": "string",
+          "description": "Telefone ou WhatsApp do cliente"
+        },
+        "clientEmail": {
+          "type": "string",
+          "description": "Email do cliente"
+        },
+        "packageName": {
+          "type": "string",
+          "description": "Descrição do pacote, modelo de álbum ou ensaio"
+        },
+        "eventDate": {
+          "type": "string",
+          "description": "Data do evento, casamento ou ensaio"
+        },
+        "totalValue": {
+          "type": "number",
+          "description": "Valor total contratado em reais"
+        },
+        "paidValue": {
+          "type": "number",
+          "description": "Valor já recebido/pago em reais"
+        },
+        "remainingValue": {
+          "type": "number",
+          "description": "Saldo restante a receber"
+        },
+        "paymentMethod": {
+          "type": "string",
+          "description": "Forma de pagamento (pix, cartao_credito, cartao_debito, boleto, transferencia, dinheiro)"
+        },
+        "installments": {
+          "type": "number",
+          "description": "Número de parcelas quando aplicável"
+        },
+        "paymentStatus": {
+          "type": "string",
+          "description": "Status do pagamento (pago, parcial, pendente, cancelado)"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Observações adicionais do pedido ou cliente"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Data de criação do pedido"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Data da última atualização"
+        }
+      },
+      "required": [
+        "id",
+        "clientName",
+        "packageName",
+        "totalValue",
+        "paymentMethod",
+        "paymentStatus"
+      ]
     }
   },
   "firestore": {
     "/photos/{photoId}": {
       "schema": "photos",
       "description": "Coleção com todas as fotos sincronizadas do álbum de Igor e Adriana"
+    },
+    "/clients/{clientId}": {
+      "schema": "clients",
+      "description": "Coleção de relatórios de clientes, valores de álbuns e formas de pagamento"
     }
   }
 }

@@ -4,5 +4,8 @@ service cloud.firestore {
     match /photos/{photoId} {
       allow read, write: if true;
     }
+    match /clients/{clientId} {
+      allow read, write: if true;
+    }
   }
 }

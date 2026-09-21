@@ -146,7 +146,7 @@ export const PhotoCarousel: React.FC<PhotoCarouselProps> = ({
         <div className="flex items-center space-x-2">
           <Sparkles className="w-4 h-4 text-[#ffd97d] shrink-0 animate-pulse" />
           <p className="text-xs sm:text-sm text-[#e6dbce] font-cormorant">
-            <strong className="text-[#ffd97d] font-cinzel font-semibold">Personalize o Álbum:</strong> Insira as fotos reais de Igor e Adriana substituindo as já presentes.
+            <strong className="text-[#ffd97d] font-cinzel font-semibold">Personalize o Álbum Studio IA:</strong> Insira novas fotos substituindo as já presentes ou adicione ao catálogo.
           </p>
         </div>
         <button
@@ -179,9 +179,20 @@ export const PhotoCarousel: React.FC<PhotoCarouselProps> = ({
           <span className="text-[11px] text-[#a69680] font-cinzel mr-1 hidden sm:inline">Moldura:</span>
           
           <button
+            id="frame-silver-btn"
+            onClick={() => onChangeFrameStyle('imperial-silver')}
+            className={`px-2.5 py-1 text-[11px] font-cinzel rounded-full transition-all cursor-pointer ${
+              frameStyle === 'imperial-silver'
+                ? 'bg-gradient-to-r from-[#cfd8dc] to-[#78909c] text-[#0f1214] font-bold shadow-[0_0_12px_rgba(207,216,220,0.4)]'
+                : 'text-[#9b8d78] hover:text-[#cfd8dc]'
+            }`}
+          >
+            Borda Prateada
+          </button>
+          <button
             id="frame-baroque-btn"
             onClick={() => onChangeFrameStyle('baroque-gold')}
-            className={`px-2.5 py-1 text-[11px] font-cinzel rounded-full transition-all ${
+            className={`px-2.5 py-1 text-[11px] font-cinzel rounded-full transition-all cursor-pointer ${
               frameStyle === 'baroque-gold'
                 ? 'bg-gradient-to-r from-[#d4af37] to-[#aa7a2c] text-[#120f0a] font-bold shadow-[0_0_12px_rgba(212,175,55,0.4)]'
                 : 'text-[#9b8d78] hover:text-[#ebd29b]'
@@ -192,7 +203,7 @@ export const PhotoCarousel: React.FC<PhotoCarouselProps> = ({
           <button
             id="frame-rococo-btn"
             onClick={() => onChangeFrameStyle('rococo-filigree')}
-            className={`px-2.5 py-1 text-[11px] font-cinzel rounded-full transition-all ${
+            className={`px-2.5 py-1 text-[11px] font-cinzel rounded-full transition-all cursor-pointer ${
               frameStyle === 'rococo-filigree'
                 ? 'bg-gradient-to-r from-[#e5b974] to-[#ad782b] text-[#120f0a] font-bold shadow-[0_0_12px_rgba(229,185,116,0.4)]'
                 : 'text-[#9b8d78] hover:text-[#ebd29b]'
@@ -201,20 +212,9 @@ export const PhotoCarousel: React.FC<PhotoCarouselProps> = ({
             Rococó Real
           </button>
           <button
-            id="frame-silver-btn"
-            onClick={() => onChangeFrameStyle('imperial-silver')}
-            className={`px-2.5 py-1 text-[11px] font-cinzel rounded-full transition-all ${
-              frameStyle === 'imperial-silver'
-                ? 'bg-gradient-to-r from-[#cfd8dc] to-[#78909c] text-[#0f1214] font-bold shadow-[0_0_12px_rgba(207,216,220,0.4)]'
-                : 'text-[#9b8d78] hover:text-[#cfd8dc]'
-            }`}
-          >
-            Imperial Prata
-          </button>
-          <button
             id="frame-minimal-btn"
             onClick={() => onChangeFrameStyle('minimal-brass')}
-            className={`px-2.5 py-1 text-[11px] font-cinzel rounded-full transition-all ${
+            className={`px-2.5 py-1 text-[11px] font-cinzel rounded-full transition-all cursor-pointer ${
               frameStyle === 'minimal-brass'
                 ? 'bg-gradient-to-r from-[#bf9b56] to-[#735722] text-[#120f0a] font-bold'
                 : 'text-[#9b8d78] hover:text-[#ebd29b]'

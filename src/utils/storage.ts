@@ -1,4 +1,4 @@
-import { PhotoItem } from '../types';
+import { PhotoItem, AlbumConfig } from '../types';
 import { INITIAL_PHOTOS } from '../data/initialPhotos';
 import { getDb } from '../firebase';
 import {
@@ -13,10 +13,44 @@ import {
   onSnapshot,
 } from 'firebase/firestore';
 
-const DB_NAME = 'IgorAdrianaAlbumDB';
+const DB_NAME = 'StudioIA_AlbumDB';
 const STORE_NAME = 'photos';
 const DB_VERSION = 1;
 const FIRESTORE_COLLECTION = 'photos';
+const CONFIG_STORAGE_KEY = 'studio_ia_album_config';
+
+export const DEFAULT_ALBUM_CONFIG: AlbumConfig = {
+  studioName: 'Studio IA',
+  coupleName: 'Novo Casal',
+  modelName: 'Modelo Principal',
+  subtitle: 'Álbum & Portfólio Fotográfico de Alta Costura | Memórias & Momentos Eternos',
+};
+
+export function loadStoredAlbumConfig(): AlbumConfig {
+  try {
+    const raw = localStorage.getItem(CONFIG_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        studioName: parsed.studioName || DEFAULT_ALBUM_CONFIG.studioName,
+        coupleName: parsed.coupleName ?? DEFAULT_ALBUM_CONFIG.coupleName,
+        modelName: parsed.modelName ?? DEFAULT_ALBUM_CONFIG.modelName,
+        subtitle: parsed.subtitle ?? DEFAULT_ALBUM_CONFIG.subtitle,
+      };
+    }
+  } catch (e) {
+    console.warn('Error reading stored album config', e);
+  }
+  return DEFAULT_ALBUM_CONFIG;
+}
+
+export function saveStoredAlbumConfig(config: AlbumConfig): void {
+  try {
+    localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(config));
+  } catch (e) {
+    console.warn('Error saving album config', e);
+  }
+}
 
 // --- Local IndexedDB Cache ---
 function openDB(): Promise<IDBDatabase> {
@@ -212,7 +246,7 @@ export async function syncPhotosToFirestore(
     try {
       await setDoc(docRef, {
         id: photoId,
-        title: photo.title || 'Momento Igor e Adriana',
+        title: photo.title || 'Momento Studio IA',
         subtitle: photo.subtitle || '',
         category: photo.category || 'casal',
         date: photo.date || '',
@@ -256,7 +290,7 @@ export function exportAlbumBackup(photos: PhotoItem[]): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `album-igor-e-adriana-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = `album-studio-ia-backup-${new Date().toISOString().slice(0, 10)}.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
